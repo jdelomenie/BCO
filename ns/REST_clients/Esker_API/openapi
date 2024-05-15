@@ -1,0 +1,1826 @@
+openapi: 3.0.1
+info:
+  title: Esker on demand REST API
+  version: v1
+servers:
+- url: https://we4.ondemand.esker.com/api
+security:
+- OAuth2: []
+  BasicAuthentication: []
+paths:
+  /v1/token:
+    post:
+      tags:
+      - Authentication
+      summary: Authenticates the user credentials and gets an authentication token.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/POST_token.html\"\
+        >REST Web services API: POST token</a> for more information."
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+              - grant_type
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  example: client_credentials
+                client_id:
+                  type: string
+                  example: YOUR-EOD-IDENTIFIER
+                client_secret:
+                  type: string
+                  example: YOUR-PASSWORD
+            encoding:
+              grant_type:
+                style: form
+              client_id:
+                style: form
+              client_secret:
+                style: form
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+  /v1/token/apikey:
+    post:
+      tags:
+      - Authentication
+      summary: Authenticates the user credentials and gets an authentication token
+        from API key.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                Login:
+                  type: string
+                AccountId:
+                  type: integer
+                  format: int64
+                ApiKeyTag:
+                  type: string
+            encoding:
+              Login:
+                style: form
+              AccountId:
+                style: form
+              ApiKeyTag:
+                style: form
+      responses:
+        "200":
+          description: Success
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/Authorization'
+        "400":
+          description: Bad Request
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "403":
+          description: Forbidden
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+        "500":
+          description: Server Error
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+  /v1/file:
+    post:
+      tags:
+      - File
+      summary: Uploads a file for subsequent usage in other functions via its ID.
+      description: "Uploaded file will be kept during 15 minutes.\r\nMaximal size\
+        \ is 50 Mo.\r\nRefer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/POST_file.html\"\
+        >REST Web services API: POST file</a> for more information."
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                uploadedFile:
+                  type: string
+                  format: binary
+            encoding:
+              uploadedFile:
+                style: form
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceFile'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "413":
+          description: The page was not displayed because the request entity is too
+            large.
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/MOD/Unaccepted/{mfpIdentifier}:
+    get:
+      tags:
+      - MOD
+      parameters:
+      - name: mfpIdentifier
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MODMonitoringRecord'
+  /v1/MOD/Resubmit:
+    post:
+      tags:
+      - MOD
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MODMonitoringRecord'
+          text/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MODMonitoringRecord'
+          application/*+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/MODMonitoringRecord'
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MODMonitoringRecord'
+  /v1/process/{processName}:
+    get:
+      tags:
+      - Process
+      summary: Initiates a query request on all instances of the given process. You
+        can specify a filter and the fields you want to retrieve.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_process_processName.html\"\
+        >REST Web services API: GET process/processName</a> for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instances\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: " String value. Name of the fields you want to query from the\
+          \ returned instances.\r\n \r\n\tExample: State,CustomerNumber__,SubmitDateTime"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ""
+      - name: filter
+        in: query
+        description: "String value. LDAP filter value to apply to the query.\r\nThe\
+          \ filter value can not exceed 1000 characters.\r\n             \r\n\tExample:\
+          \ State=70"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ""
+      - name: orderBy
+        in: query
+        description: "String value. Name of the field followed by the sorting order\
+          \ keyword: ASC for ascending (default value) and DESC for descending. You\
+          \ can sort by several fields, each followed by the sorting keyword, and\
+          \ separated by commas.\r\n             \r\n\tExamples: SubmitDateTime DESC\r\
+          \n\tCustomerNumber__, Total__ DESC"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ""
+      - name: limit
+        in: query
+        description: Integer value. Maximum number of results to retrieve (500 max
+          or 20 max if tables or attachment options are set to true).
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 20
+      - name: onlyUnretrieved
+        in: query
+        description: ""
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: tables
+        in: query
+        description: If this option is true the limit can't be superior to 20.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: attachments
+        in: query
+        description: If this option is true the limit can't be superior to 20.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether the archived process instances\
+          \ are listed in the result or not.\r\n \r\n\t   true: the archived process\
+          \ instances are listed.\r\n\t   false: the archived process instances are\
+          \ not listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessInstances'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      tags:
+      - Process
+      summary: Creates a new instance of a process from the given name of the process.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/POST_process_processName.html\"\
+        >REST Web services API: POST process/processName</a> for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process to instantiate.\r\n\r\n\t\
+          Example: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProcessInstance'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/NewProcessInstance'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/NewProcessInstance'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessInstanceCreation'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: Forbidden - Insufficient privileges
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/process/{processName}/{instanceId}:
+    get:
+      tags:
+      - Process
+      summary: Initiates a query request on one given process instance.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_process_processName_id.html\"\
+        >REST Web services API: GET process/processName/instanceId</a> for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instance\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instanceId
+        in: path
+        description: "String value. MsnEx identifier of the process instance you want\
+          \ to query.\r\n             \r\n\tExample: 949978050000000001"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: tables
+        in: query
+        description: " Boolean value. Indicates whether the table fields contained\
+          \ in the process instance are listed in the result or not.\r\n \r\n\t  \
+          \ true: the table fields are listed.\r\n\t   false: the table fields are\
+          \ not listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: summary
+        in: query
+        description: " Boolean value. Indicates whether the technical fields and the\
+          \ fields with a null value are listed in the result or not.\r\n \r\n\t \
+          \  true: the technical fields and the fields with a null value are not listed.\r\
+          \n\t   false: the technical fields and the fields with a null value are\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether the archived process instance\
+          \ is listed in the result or not.\r\n \r\n\t   true: the archived process\
+          \ instance is listed.\r\n\t   false: the archived process instance is not\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessInstance'
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/process/{processName}/{instanceId}/Document:
+    get:
+      tags:
+      - Process
+      summary: "Downloads the document to process of one given process instance in\
+        \ its initial conversion state, that is before any conversion."
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_process_processName_id_document.html\"\
+        >REST Web services API: GET process/processName/instanceId/Document</a> for\
+        \ more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instances\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instanceId
+        in: path
+        description: "String value. MsnEx identifier of the process instance you want\
+          \ to query. This identifier can be retrieved in the URL of the process instance\
+          \ form.\r\n             \r\n\tExample: 949978050000000001"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether the archived process instance\
+          \ is listed in the result or not.\r\n \r\n\t   true: the archived process\
+          \ instance is listed.\r\n\t   false: the archived process instance is not\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+  /v1/process/{processName}/{instanceId}/Document/Conversions/{conversionIndex}:
+    get:
+      tags:
+      - Process
+      summary: "Downloads the document to process of one given process instance in\
+        \ its intermediate or final conversion state, that is after one or several\
+        \ conversion steps."
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_process_processName_id_document_conversions_id.html\"\
+        >REST Web services API: GET process/processName/instanceId/Document/Conversions/conversionID</a>\
+        \ for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instances\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instanceId
+        in: path
+        description: "String value. MsnEx identifier of the process instance you want\
+          \ to query. This identifier can be retrieved in the URL of the process instance\
+          \ form.\r\n             \r\n\tExample: 949978050000000001"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: conversionIndex
+        in: path
+        description: Integer value. 0-based index representing the step number in
+          the document conversion chain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether the archived process instance\
+          \ is listed in the result or not.\r\n \r\n\t   true: the archived process\
+          \ instance is listed.\r\n\t   false: the archived process instance is not\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+  /v1/process/{processName}/{instanceId}/Attachments/{attachmentIndex}:
+    get:
+      tags:
+      - Process
+      summary: "Downloads one given attachment of one given process instance in its\
+        \ initial conversion state, that is before any conversion."
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_process_processName_id_attachments_id.html\"\
+        >REST Web services API: GET process/processName/instanceId/Attachments/attachmentId</a>\
+        \ for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instances\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instanceId
+        in: path
+        description: "String value. MsnEx identifier of the process instance you want\
+          \ to query. This identifier can be retrieved in the URL of the process instance\
+          \ form.\r\n             \r\n\tExample: 949978050000000001"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: attachmentIndex
+        in: path
+        description: Integer value representing the 0-based index of the attachment
+          you want to download.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether the archived process instance\
+          \ is listed in the result or not.\r\n \r\n\t   true: the archived process\
+          \ instance is listed.\r\n\t   false: the archived process instance is not\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+  /v1/process/{processName}/{instanceId}/Attachments/{attachmentIndex}/Conversions/{conversionIndex}:
+    get:
+      tags:
+      - Process
+      summary: "Downloads one given attachment of one given process instance in its\
+        \ intermediate or final conversion state, that is after one or several conversion\
+        \ steps."
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_process_processName_id_attachments_id_conversions_id.html\"\
+        >REST Web services API: GET process/processName/instanceId/Attachments/attachmentId/Conversions/conversionID</a>\
+        \ for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instances\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instanceId
+        in: path
+        description: "String value. MsnEx identifier of the process instance you want\
+          \ to query. This identifier can be retrieved in the URL of the process instance\
+          \ form.\r\n             \r\n\tExample: 949978050000000001"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: attachmentIndex
+        in: path
+        description: Integer value representing the 0-based index of the attachment
+          you want to download.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: conversionIndex
+        in: path
+        description: Integer value. 0-based index representing the step number in
+          the attachment conversion chain.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether the archived process instance\
+          \ is listed in the result or not.\r\n \r\n\t   true: the archived process\
+          \ instance is listed.\r\n\t   false: the archived process instance is not\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+  /v1/process/{processName}/{instanceId}/retrieved:
+    patch:
+      tags:
+      - Process
+      summary: Ability to mark a process instance as retrieved / downloaded.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/PATCH_process_processName_id_retrieved.html\"\
+        >REST Web services API: PATCH process/processName/instanceId/Retrieved</a>\
+        \ for more information."
+      parameters:
+      - name: processName
+        in: path
+        description: " String value. Name of the process you want to query the instances\
+          \ from.\r\n \r\n\tExample: Customer Order Processing"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: instanceId
+        in: path
+        description: "String value. MsnEx identifier of the process instance you want\
+          \ to query. This identifier can be retrieved in the URL of the process instance\
+          \ form.\r\n             \r\n\tExample: 949978050000000001"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: archived
+        in: query
+        description: " Boolean value. Indicates whether to mark process instance which\
+          \ is archived.\r\n \r\n\t   true: the archived process instance is marked.\r\
+          \n\t   false: the archived process instance is not marked (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "204":
+          description: Success - No Content
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/table/{tableName}:
+    get:
+      tags:
+      - Table
+      summary: Initiates a query request on all records of the given table. You can
+        specify a filter and the fields you want to retrieve.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_table_tableName.html\"\
+        >REST Web services API: GET table/tableName</a> for more information."
+      parameters:
+      - name: tableName
+        in: path
+        description: " String value. Name of the table you want to query the records\
+          \ from. Ends with two underscore characters.\r\n \r\n\tExample: SO - Materials__"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: fields
+        in: query
+        description: " String value. Name of the fields you want to query from the\
+          \ table.\r\n \r\n\tExample: Number__,Description__"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ""
+      - name: filter
+        in: query
+        description: "String value. LDAP filter value to apply to the query.\r\nThe\
+          \ filter value can not exceed 1000 characters.\r\n             \r\n\tExample:\
+          \ Number__=1400-100"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ""
+      - name: orderBy
+        in: query
+        description: "String value. Name of the field followed by the sorting order\
+          \ keyword: ASC for ascending (default value) and DESC for descending. You\
+          \ can sort by several fields, each followed by the sorting keyword, and\
+          \ separated by commas.\r\n             \r\n\tExamples: Description__\r\n\
+          \tDescription__, Number__ DESC"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ""
+      - name: limit
+        in: query
+        description: Integer value. Maximum number of results to retrieve (500 max).
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 500
+          minimum: 1
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableRecords'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      tags:
+      - Table
+      summary: Creates a new record in the table with the given name.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/POST_table_tableName.html\"\
+        >REST Web services API: POST table/tableName</a> for more information."
+      parameters:
+      - name: tableName
+        in: path
+        description: " String value. Name of the table.\r\n\r\n\tExample: SO - Materials__"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableRecordData'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/TableRecordData'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/TableRecordData'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableRecordIdentifier'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: Forbidden - Insufficient privileges
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+  /v1/table/{tableName}/{recordId}:
+    get:
+      tags:
+      - Table
+      summary: Initiates a query request on one given table record.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/GET_table_tableName_id.html\"\
+        >REST Web services API: GET table/tableName/recordId</a> for more information."
+      parameters:
+      - name: tableName
+        in: path
+        description: " String value. Name of the table you want to query the record\
+          \ from.\r\n \r\n\tExample: SO - Materials__"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: recordId
+        in: path
+        description: "String value. MsnEx identifier of the table record you want\
+          \ to query.\r\n             \r\n\tExample: 959829674898431422"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: summary
+        in: query
+        description: " Boolean value. Indicates whether the technical fields and the\
+          \ fields with a null value are listed in the result or not.\r\n \r\n\t \
+          \  true: the technical fields and the fields with a null value are not listed.\r\
+          \n\t   false: the technical fields and the fields with a null value are\
+          \ listed (default)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableRecord'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      tags:
+      - Table
+      summary: Delete a record from the table with the given name.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/DELETE_table_tableName.html\"\
+        >REST Web services API: DELETE table/tableName</a> for more information."
+      parameters:
+      - name: tableName
+        in: path
+        description: " String value. Name of the table.\r\n\r\n\tExample: SO - Materials__"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: recordId
+        in: path
+        description: "String value. MsnEx identifier of the table record to delete.\r\
+          \n             \r\n\tExample: 959829674898431422"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Deleted
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: Forbidden - Insufficient privileges
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+    patch:
+      tags:
+      - Table
+      summary: Update a record in the table with the given name.
+      description: "Refer to <a href=\"https://doc.esker.com/eskerondemand/cv_ly/en/manager/startpage.htm#REST/PATCH_table_tableName.html\"\
+        >REST Web services API: PATCH table/tableName</a> for more information."
+      parameters:
+      - name: tableName
+        in: path
+        description: " String value. Name of the table.\r\n\r\n\tExample: SO - Materials__"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: recordId
+        in: path
+        description: "String value. MsnEx identifier of the table record to update.\r\
+          \n             \r\n\tExample: 959829674898431422"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TableRecordData'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/TableRecordData'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/TableRecordData'
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TableRecordIdentifier'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized - You need to make a new authentication (call
+            token route)
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: Forbidden - Insufficient privileges
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: string
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+components:
+  schemas:
+    AttachmentFile:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+          example: c70dc1d2d4384f40920702480bf92a45_MyDocument.pdf
+        options:
+          type: object
+          additionalProperties:
+            nullable: true
+          nullable: true
+          example:
+            AttachOutputFormat: .pdf
+            AttachOutputName: MyOrder000743
+      additionalProperties: false
+    Authorization:
+      type: object
+      properties:
+        access_token:
+          type: string
+          nullable: true
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        expires_in:
+          type: integer
+          format: int32
+          example: 3600
+        token_type:
+          type: string
+          nullable: true
+          readOnly: true
+          example: Bearer
+        scope:
+          type: string
+          nullable: true
+          readOnly: true
+          example: EskerApi
+      additionalProperties: false
+    MODMonitoringRecord:
+      type: object
+      properties:
+        tower:
+          type: string
+          nullable: true
+        msnex:
+          type: string
+          nullable: true
+        sendDateTime:
+          type: string
+          nullable: true
+        childType:
+          type: string
+          nullable: true
+        childMsnex:
+          type: string
+          nullable: true
+        childResubmit:
+          type: boolean
+      additionalProperties: false
+    NewProcessInstance:
+      type: object
+      properties:
+        document:
+          $ref: '#/components/schemas/AttachmentFile'
+        attachments:
+          type: array
+          nullable: true
+          example:
+          - id: d494ba8f69b340a39e4ec34c053aa936_DeliveryInstructions.pdf
+          - id: 8b05c8bc880f47f392089a0cf7eef305_InitialAgreement.pdf
+          items:
+            $ref: '#/components/schemas/AttachmentFile'
+        fields:
+          type: object
+          additionalProperties:
+            nullable: true
+          nullable: true
+          example:
+            ContactEmail__: john.doe@demo.com
+            Source__: MyOrderUploadingApp
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+          nullable: true
+          example:
+            Configuration: SAP
+      additionalProperties: false
+    ProcessInstance:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+          example: "949978050000000001"
+        document:
+          $ref: '#/components/schemas/ProcessInstanceDocument'
+        attachments:
+          type: array
+          nullable: true
+          example:
+            index: 0
+            name: MyAttachment000785.pdf
+            conversions:
+            - index: 0
+            options:
+              AttachOutputName: MyAttachment000785
+              AttachOriginalName: MyAttachment000785
+          items:
+            $ref: '#/components/schemas/ProcessInstanceAttachment'
+        fields:
+          type: object
+          additionalProperties:
+            nullable: true
+          nullable: true
+          example:
+            Msn: 1231
+            Tags: AP VIP
+            RUID: CD#ABCDE0000XY1.1231
+            ERP__: generic
+            JobID: UVWX4Y6
+            State: 70
+            MsnEx: "949978050000000001"
+            Split: 0
+            FromAddress: john.doe@demo.com
+            AutomaticallyModifiedFieldsCount__: 0
+            OOTOEnable: 1
+            PostedBy__: ""
+            RejectReason__: -- none --
+            SLADateTime: 2022-03-30 07:25:40.976
+            DocumentType: Customer Order
+        tables:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              additionalProperties: {}
+          nullable: true
+      additionalProperties: false
+    ProcessInstanceAttachment:
+      required:
+      - conversions
+      - index
+      - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+          example: MyOrder000743.pdf
+        conversions:
+          type: array
+          example:
+          - index: 0
+          items:
+            $ref: '#/components/schemas/ProcessInstanceConvertedFile'
+        options:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+          nullable: true
+          example:
+            AttachOutputFormat: .tif
+            AttachOutputName: MyOrder000743
+            AttachOriginalName: MyOrder000743
+        index:
+          type: integer
+          format: int32
+      additionalProperties: false
+    ProcessInstanceConvertedFile:
+      required:
+      - index
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+      additionalProperties: false
+    ProcessInstanceCreation:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+          example: "949978050000000003"
+      additionalProperties: false
+    ProcessInstanceDocument:
+      required:
+      - conversions
+      - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+          example: MyOrder000743.pdf
+        conversions:
+          type: array
+          example:
+          - index: 0
+          items:
+            $ref: '#/components/schemas/ProcessInstanceConvertedFile'
+        options:
+          type: object
+          additionalProperties:
+            type: string
+            nullable: true
+          nullable: true
+          example:
+            AttachOutputFormat: .tif
+            AttachOutputName: MyOrder000743
+            AttachOriginalName: MyOrder000743
+      additionalProperties: false
+    ProcessInstances:
+      required:
+      - instances
+      type: object
+      properties:
+        instances:
+          type: array
+          readOnly: true
+          example:
+          - id: "949978050000000003"
+            fields:
+              Msn: 1233
+              State: 70
+              MsnEx: "949978050000000003"
+              SubmitDateTime: 2022-03-01 07:37:36
+              CustomerNumber__: "01587796"
+          - id: "949978050000000002"
+            fields:
+              Msn: 1232
+              State: 70
+              MsnEx: "949978050000000002"
+              SubmitDateTime: 2022-03-01 07:37:25
+              CustomerNumber__: Adecom45
+          - id: "949978050000000001"
+            fields:
+              Msn: 1231
+              State: 70
+              MsnEx: "949978050000000001"
+              SubmitDateTime: 2022-03-01 07:37:01
+              CustomerNumber__: "27889998"
+          items:
+            $ref: '#/components/schemas/ProcessInstance'
+      additionalProperties: false
+    ResourceFile:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+          example: c70dc1d2d4384f40920702480bf92a45_MyDocument.pdf
+      additionalProperties: false
+    TableRecord:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+          example: "959829674898431422"
+        fields:
+          type: object
+          additionalProperties:
+            nullable: true
+          nullable: true
+          example:
+            Msn: 1233
+            MsnEx: "959829674898431422"
+            Number__: 1400-100
+            Description__: Deluxe Headlight
+      additionalProperties: false
+    TableRecordData:
+      required:
+      - fields
+      type: object
+      properties:
+        fields:
+          type: object
+          additionalProperties:
+            nullable: true
+          example:
+            Number__: "00000000012348"
+            Material_ID_in_ERP__: "00000000012348"
+            Description__: Nitinol Loop Passer
+            EAN__: "08470006856444"
+      additionalProperties: false
+    TableRecordIdentifier:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          minLength: 1
+          type: string
+          example: "961799999735290209"
+      additionalProperties: false
+    TableRecords:
+      required:
+      - records
+      type: object
+      properties:
+        records:
+          type: array
+          readOnly: true
+          example:
+          - id: "959829674898431422"
+            fields:
+              Msn: 1233
+              MsnEx: "959829674898431422"
+              Number__: 1400-100
+              Description__: Deluxe Headlight
+          - id: "959829674898431508"
+            fields:
+              Msn: 1232
+              MsnEx: "959829674898431508"
+              Number__: 1400-200
+              Description__: Deluxe Taillight
+          items:
+            $ref: '#/components/schemas/TableRecord'
+      additionalProperties: false
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      description: OAuth2 authentication.
+      flows:
+        clientCredentials:
+          tokenUrl: /api/v1/token
+          scopes: {}
+    BasicAuthentication:
+      type: http
+      description: Basic Authorization header.
+      scheme: basic
